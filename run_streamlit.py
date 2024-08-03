@@ -20,27 +20,33 @@ long_text = st.text_area("Input Text", height=300)
 # Create buttons
 button_title = None
 button_tags = None
-
-cols = st.columns([1, 1, 5])
+button_critic = None
+button_hiphop = None
+cols = st.columns([1, 1, 1, 1, 2])
 with cols[0]:
-    button_title = st.button("Title")
+    button_title = st.button("타이틀")
 with cols[1]:
-    button_tags = st.button("Tags")
+    button_tags = st.button("태그")
+with cols[2]:
+    button_critic = st.button("평가")
+with cols[3]:
+    button_hiphop = st.button("힙합")
 
 # Placeholder for the output
 output = st.empty()
+
 
 # Actions when buttons are clicked
 out_type = None
 if button_title:
     out_type = "title"
-    # Example processing: count the number of words
-    # output.write("Title button was clicked.")
-
 if button_tags:
     out_type = "tags"
-    # Example of another action
-    # output.write("Tags button was clicked.")
+if button_critic:
+    out_type = "critic"
+if button_hiphop:
+    out_type = "hiphop"
+
 
 if out_type:
     out_text = blog.run(long_text, out_type)
