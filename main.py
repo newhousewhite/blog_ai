@@ -5,6 +5,7 @@
 
 import requests
 import os
+from openai import OpenAI
 
 
 class BlogWriter:
@@ -16,6 +17,8 @@ class BlogWriter:
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
+
+        self.client = OpenAI()
 
     def gen_prompt_title(self, text_body=None):
         if text_body is None:
@@ -146,6 +149,24 @@ i made it out the gutter 여전히 더 올라가기 위해 매일 난 또 걸어
 [원고]는 아래에 있습니다.
 {text_body}"""
 
+    def gen_prompt_classic(self, text_body=None):
+            return f""""[원고]를 고전 문학 스타일로 고전 시를 만들어줘. 
+[원고]는 아래에 있습니다.
+{text_body}"""
+
+    def gen_prompt_bossy(self, text_body=None):
+        return f""""꼰대 아저씨 말투로 [원고]를 젊은이에게 한소리하시는 상황에서 할 법한 멘트를 6문장 안으로 다시 작성해줘. 
+    [원고]는 아래에 있습니다.
+    {text_body}"""
+
+    def gen_prompt_idiom(self, text_body=None):
+        return f""""[원고]의 내용을 읽고 가장 잘어울리는 사자성어 1개와 그 뜻을 함께 알려주세요. 
+    [원고]는 아래에 있습니다.
+    {text_body}"""
+
+    def gen_prompt_image(self, text_body=None):
+        return f"아래 제목에 맞는 이미지를 생성해주세요.\n{text_body}"
+
     def get_data(self, prompt_str, model="gpt-4o-mini"):
         if   model == "gpt-4o-mini":
             max_tokens = 16000
@@ -179,27 +200,53 @@ i made it out the gutter 여전히 더 올라가기 위해 매일 난 또 걸어
             print(response.json())
             return "Error"
 
+    def gen_text_out(self, prompt_str, model_name):
+        data = self.get_data(prompt_str, model=model_name)
+        return self.get_output(data)
+
+    def gen_image_out(self, prompt_str, model_name="dall-e-3"):
+        response = self.client.images.generate(
+            prompt=prompt_str,
+            n=1,  # Number of images to generate
+            size="1792x1024",  # Size of the image
+            quality="standard",
+            model=model_name  # Specify the model
+        )
+
+        # Get the URL of the generated image
+        image_url = response.data[0].url
+        print("Image URL:", image_url)
+        return image_url
+
+
     def run(self, text_body, task):
         prompt_str = ""
         if task == "title":
             prompt_str = self.gen_prompt_title(text_body)
-            model_name = "gpt-4o-mini"
+            return self.gen_text_out(prompt_str, "gpt-4o-mini")
         elif task == "image":
-            return None
+            prompt_str = self.gen_prompt_image(text_body)
+            return self.gen_image_out(prompt_str)
         elif task == "tags":
             prompt_str = self.gen_prompt_tags(text_body)
-            model_name = "gpt-4o-mini"
+            return self.gen_text_out(prompt_str, "gpt-4o-mini")
+        elif task == "classic":
+            prompt_str = self.gen_prompt_classic(text_body)
+            return self.gen_text_out(prompt_str, "gpt-4o-mini")
+        elif task == "bossy":
+            prompt_str = self.gen_prompt_bossy(text_body)
+            return self.gen_text_out(prompt_str, "gpt-4o-mini")
+        elif task == "idiom":
+            prompt_str = self.gen_prompt_idiom(text_body)
+            return self.gen_text_out(prompt_str, "gpt-4o-mini")
         elif task == "critic":
             prompt_str = self.gen_prompt_critic(text_body)
-            model_name = "gpt-4o"
+            return self.gen_text_out(prompt_str, "gpt-4o")
         elif task == "hiphop":
             prompt_str = self.gen_prompt_hiphop(text_body)
-            model_name = "gpt-4o-mini"
+            return self.gen_text_out(prompt_str, "gpt-4o-mini")
         else:
             return None
-
-        data = self.get_data(prompt_str, model=model_name)
-        return self.get_output(data)
 
 
 

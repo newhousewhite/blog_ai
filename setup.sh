@@ -12,4 +12,4 @@ source $VENV_DIR/venv/bin/activate
 export PYTHONPATH=${VENV_DIR}
                                                                                                       
 # install pip
-pip install Flask, requests, streamlit
+pip install Flask requests streamlit openai beautifulsoup4
